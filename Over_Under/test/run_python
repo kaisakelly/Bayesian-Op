@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+set -e
+
+TEST_DIR="$1"
+shift
+
+TEST_FILE="$1"
+shift
+
+cd "$TEST_DIR"
+# We allow system site packages to make installing numpy/scipy less burdensome
+virtualenv venv --system-site-packages
+source venv/bin/activate
+if [ -f requirements.txt ]; then
+  cat requirements.txt | grep sigopt  # sigopt python package must be included
+  set +e
+  cat requirements.txt | grep -v numpy | grep -v scipy >requirements-clean.txt
+  set -e
+  pip install -r requirements-clean.txt
+fi
+exec python "$TEST_FILE" "$@"
